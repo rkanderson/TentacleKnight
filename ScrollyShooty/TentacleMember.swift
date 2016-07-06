@@ -11,7 +11,18 @@ import SpriteKit
 
 class TentacleMember: SKSpriteNode {
     
-    var isControllableTentacle = false //Should be true if this member is the last one in the string. Set in GameScene
+    //Should be true if this member is the last one in the string. Set in GameScene
+    var isControllableTentacle = false {
+        didSet {
+            if isControllableTentacle {
+                zPosition = 2
+                texture = SKSpriteNode(color: SKColor.brownColor(), size: size).texture
+            } else {
+                zPosition = 0
+                texture = SKSpriteNode(color: SKColor.blackColor(), size: size).texture
+            }
+        }
+    }
     var isBeingManipulated = false //Turns true when the player taps and holds the tentacle
 //    var controllingTouch: UITouch?
     
