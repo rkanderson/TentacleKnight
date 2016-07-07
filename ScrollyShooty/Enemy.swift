@@ -44,10 +44,12 @@ class Enemy: SKSpriteNode {
             //This enemy hit the wall on the left, move Right Now!
             physicsBody?.velocity.dx = standardEnemySpeed
             self.direction = .Right
+            xScale = abs(xScale)
         } else if direction == .Right {
             //Hit the right, turn left!
             physicsBody?.velocity.dx = -standardEnemySpeed
             self.direction = .Left
+            xScale = -abs(xScale)
         }
     }
     
