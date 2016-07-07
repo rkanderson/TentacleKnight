@@ -11,7 +11,8 @@ import SpriteKit
 
 class Enemy: SKSpriteNode {
     
-    let standardEnemySpeed: CGFloat = 10
+    let standardEnemySpeed: CGFloat = 100
+    var direction: Direction = .Right
     
     func setUp() {
         physicsBody?.velocity.dx = standardEnemySpeed
@@ -27,15 +28,26 @@ class Enemy: SKSpriteNode {
         super.init(coder: aDecoder)
     }
     
+    func update(currentTime: CFTimeInterval) {
+        //Artificial update that should be called from GameScene.swift! 🍬
+        if self.direction == .Right {
+            physicsBody?.velocity.dx = standardEnemySpeed
+        } else {
+            physicsBody?.velocity.dx = -standardEnemySpeed
+        }
+    }
+    
+    
     //This enemy is kinda going to act like the goomba from mario 🍄
     func hitWall(direction: Direction) {
         if direction == .Left {
             //This enemy hit the wall on the left, move Right Now!
             physicsBody?.velocity.dx = standardEnemySpeed
-            
+            self.direction = .Right
         } else if direction == .Right {
             //Hit the right, turn left!
             physicsBody?.velocity.dx = -standardEnemySpeed
+            self.direction = .Left
         }
     }
     

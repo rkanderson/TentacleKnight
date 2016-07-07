@@ -44,6 +44,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
         }
     }
+    var enemyLayer: SKNode!
+    var grabJoint: SKPhysicsJointPin?
 
     override func didMoveToView(view: SKView) {
         physicsWorld.contactDelegate = self
@@ -51,9 +53,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         player = childNodeWithName("player") as! SKSpriteNode
         tentacleDragger = childNodeWithName("tentacleDragger")
         let colorPartOfTentacleDragger = childNodeWithName("//colorPartOfTentacleDragger") as SKNode!
-        let cpotdJoint = SKPhysicsJointPin.jointWithBodyA(tentacleDragger.physicsBody!, bodyB: colorPartOfTentacleDragger.physicsBody! , anchor: convertPoint(colorPartOfTentacleDragger.position, fromNode: colorPartOfTentacleDragger) )
+        let cpotdJoint = SKPhysicsJointPin.jointWithBodyA(tentacleDragger.physicsBody!, bodyB: colorPartOfTentacleDragger.physicsBody! , anchor: colorPartOfTentacleDragger.position)
         physicsWorld.addJoint(cpotdJoint)
         tentacleCount = 0
+        
+        enemyLayer = childNodeWithName("enemyLayer")
+        for ref in enemyLayer.children {
+            let enemy = ref.childNodeWithName("//avatar") as! Enemy
+            enemy.setUp()
+        }
     }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
@@ -88,6 +96,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 player.physicsBody?.velocity.dx = 0
             } else if touch === tentacleMovingTouch {
                 tentacleMovingTouch = nil
+                if let _ = grabJoint {
+                    runAction(SKAction.runBlock{
+                        self.physicsWorld.removeJoint(self.grabJoint!)
+                        self.grabJoint = nil
+                    })
+                }
                 //physicsWorld.removeJoint(tentacleDragJoint!)
                 //tentacleDragJoint = nil
                 //player.physicsBody!.pinned = false
@@ -116,6 +130,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 // move the tentacleDragger
                 
                 //caps the distance the player can drag
+                let desiredTentacleDraggerPosition: CGPoint
                 if player.position.distanceTo(touch.locationInNode(self)) > tentacleMemberWidth * CGFloat(tentacleCount) {
                     //print("too far for tentacle!")
                     //Here I need to move the tentacle dragger to be in the same direction
@@ -132,10 +147,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                         newY = player.position.y + (sin(angle) * desiredDistance)
                         newX = player.position.x + (cos(angle) * desiredDistance)
                     }
-                    tentacleDragger.position = CGPoint(x: newX, y: newY)
+                    
+                    desiredTentacleDraggerPosition = CGPoint(x: newX, y: newY)
                 } else {
-                    tentacleDragger.position = touch.locationInNode(self)
+                    desiredTentacleDraggerPosition = touch.locationInNode(self)
                 }
+//                tentacleDragger.runAction(SKAction.moveTo(desiredTentacleDraggerPosition, duration: 0))
+                tentacleDragger.physicsBody?.velocity.dx = desiredTentacleDraggerPosition.x - tentacleDragger.position.x
+                tentacleDragger.physicsBody?.velocity.dy = desiredTentacleDraggerPosition.y - tentacleDragger.position.y
+                
                 
                 
             }
@@ -163,12 +183,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         } else {
             camera!.position.x = player.position.x
         }
-        
-        // So about the thing with the canJumpCounter
-        // There's this bug where the contact between playerFoot and ground isn't registered,
-        // so the player gets a little crippled and can't jump, so I'm going to every so often
-        // manually check if the player foot is touching the ground and set canJump like that
-        // **I should do this. sometime. once it starts to bug me. which it probably won't.
+        for ref in enemyLayer.children {
+            let enemy = ref.childNodeWithName("//avatar") as! Enemy
+            enemy.update(currentTime)
+        }
+
     }
     
     
@@ -229,21 +248,30 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 return
             }
         }
+        
+        //Between player hand and a solid object
+        if (contactA.categoryBitMask == 512 && contactB.categoryBitMask == 32) ||
+            (contactA.categoryBitMask == 32 && contactB.categoryBitMask == 512) {
+            let hand = contactA.categoryBitMask == 512 ? nodeA : nodeB
+            let solidObject = nodeA !== tentacleDragger ? nodeA : nodeB
+            if grabJoint != nil || tentacleMovingTouch == nil
+            { //If there already is a grab joint that exists, don't make another. Also, the player has to be touching to grab
+                return
+            } else {
+                // Ok so there isn't a joint and the player's hand touched some solid object. Time to make a joint between the two. They better have physics bodies.......
+                grabJoint = SKPhysicsJointPin.jointWithBodyA(hand.physicsBody!, bodyB: solidObject.physicsBody!, anchor: hand.position)
+                physicsWorld.addJoint(grabJoint!)
+            }
+        }
     }
     
     func didEndContact(contact: SKPhysicsContact) {
         let contactA = contact.bodyA
         let contactB = contact.bodyB
-        let nodeA = contactA.node as! SKSpriteNode
-        let nodeB = contactB.node as! SKSpriteNode
-//
-//        //Did the contact end between the player's foot and a platform?
-//        if (contactA.categoryBitMask == 2 && contactB.categoryBitMask == 4) ||
-//            (contactA.categoryBitMask == 4 && contactB.categoryBitMask == 2) {
-//            canJump = false
-//        }
-        
-        //player jumped off
+//        let nodeA = contactA.node as! SKSpriteNode
+//        let nodeB = contactB.node as! SKSpriteNode
+
+        //player-platform contact end
         if (contactA.categoryBitMask == 1 && contactB.categoryBitMask == 4) || (contactA.categoryBitMask == 4 && contactB.categoryBitMask == 1) {
             let playerPoint = player.position
             let difference = playerPoint.y - player.size.height/2 - contact.contactPoint.y
@@ -293,7 +321,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         lastTentacleMember = tentacle
         
-        // TODO Change the spring joint for the tentacle dragger to be connected to the new, most recent tentacle
         tentacleDragger.position = convertPoint(CGPoint(x: tentacle.size.width, y: 0), fromNode: lastTentacleMember!)
         tentacleDragger.childNodeWithName("colorPartOfTentacleDragger")?.position = tentacleDragger.convertPoint(CGPoint(x: tentacle.size.width, y: 0), fromNode: lastTentacleMember!)
         if let tentacleDragJoint = tentacleDragJoint {
