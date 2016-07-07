@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		833B7E921D2D85710069C6C9 /* TentacleMember.swift in Sources */ = {isa = PBXBuildFile; fileRef = 833B7E911D2D85710069C6C9 /* TentacleMember.swift */; };
+		8346A4DF1D2ECD8200AE0A0F /* Enemy.sks in Resources */ = {isa = PBXBuildFile; fileRef = 8346A4DE1D2ECD8200AE0A0F /* Enemy.sks */; };
+		8346A4E11D2ECEFF00AE0A0F /* Enemy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8346A4E01D2ECEFF00AE0A0F /* Enemy.swift */; };
 		839686231D2C4AFD007CF4F6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839686221D2C4AFD007CF4F6 /* AppDelegate.swift */; };
 		839686251D2C4AFD007CF4F6 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 839686241D2C4AFD007CF4F6 /* GameScene.sks */; };
 		839686271D2C4AFD007CF4F6 /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839686261D2C4AFD007CF4F6 /* GameScene.swift */; };
@@ -33,6 +35,8 @@
 
 /* Begin PBXFileReference section */
 		833B7E911D2D85710069C6C9 /* TentacleMember.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TentacleMember.swift; sourceTree = "<group>"; };
+		8346A4DE1D2ECD8200AE0A0F /* Enemy.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Enemy.sks; sourceTree = "<group>"; };
+		8346A4E01D2ECEFF00AE0A0F /* Enemy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Enemy.swift; sourceTree = "<group>"; };
 		8396861F1D2C4AFD007CF4F6 /* ScrollyShooty.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ScrollyShooty.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		839686221D2C4AFD007CF4F6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		839686241D2C4AFD007CF4F6 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
@@ -98,6 +102,8 @@
 				8396862F1D2C4AFE007CF4F6 /* LaunchScreen.storyboard */,
 				839686321D2C4AFE007CF4F6 /* Info.plist */,
 				833B7E911D2D85710069C6C9 /* TentacleMember.swift */,
+				8346A4DE1D2ECD8200AE0A0F /* Enemy.sks */,
+				8346A4E01D2ECEFF00AE0A0F /* Enemy.swift */,
 			);
 			path = ScrollyShooty;
 			sourceTree = "<group>";
@@ -193,6 +199,7 @@
 				839686251D2C4AFD007CF4F6 /* GameScene.sks in Resources */,
 				839686311D2C4AFE007CF4F6 /* LaunchScreen.storyboard in Resources */,
 				8396862E1D2C4AFE007CF4F6 /* Assets.xcassets in Resources */,
+				8346A4DF1D2ECD8200AE0A0F /* Enemy.sks in Resources */,
 				8396862C1D2C4AFD007CF4F6 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -213,6 +220,7 @@
 				839686541D2C7967007CF4F6 /* SKTTimingFunctions.swift in Sources */,
 				8396864F1D2C7967007CF4F6 /* SKAction+SpecialEffects.swift in Sources */,
 				8396864D1D2C7967007CF4F6 /* Int+Extensions.swift in Sources */,
+				8346A4E11D2ECEFF00AE0A0F /* Enemy.swift in Sources */,
 				839686551D2C7967007CF4F6 /* Vector3.swift in Sources */,
 				839686231D2C4AFD007CF4F6 /* AppDelegate.swift in Sources */,
 				839686501D2C7967007CF4F6 /* SKColor+Extensions.swift in Sources */,

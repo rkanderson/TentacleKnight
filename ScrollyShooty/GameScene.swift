@@ -10,6 +10,10 @@ import Foundation
 import CoreMotion
 import SpriteKit
 
+enum Direction {
+    case Left, Right
+}
+
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
     let fixedDelta: CFTimeInterval = 1/60 //60 FPS
@@ -46,6 +50,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         //physicsBody = SKPhysicsBody(edgeLoopFromRect: frame)
         player = childNodeWithName("player") as! SKSpriteNode
         tentacleDragger = childNodeWithName("tentacleDragger")
+        let colorPartOfTentacleDragger = childNodeWithName("//colorPartOfTentacleDragger") as SKNode!
+        let cpotdJoint = SKPhysicsJointPin.jointWithBodyA(tentacleDragger.physicsBody!, bodyB: colorPartOfTentacleDragger.physicsBody! , anchor: convertPoint(colorPartOfTentacleDragger.position, fromNode: colorPartOfTentacleDragger) )
+        physicsWorld.addJoint(cpotdJoint)
         tentacleCount = 0
     }
     
@@ -110,7 +117,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 
                 //caps the distance the player can drag
                 if player.position.distanceTo(touch.locationInNode(self)) > tentacleMemberWidth * CGFloat(tentacleCount) {
-                    print("too far for tentacle!")
+                    //print("too far for tentacle!")
                     //Here I need to move the tentacle dragger to be in the same direction
                     let distX = touch.locationInNode(self).x - player.position.x
                     let distY = touch.locationInNode(self).y - player.position.y
@@ -205,6 +212,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 growOrb?.removeFromParent()
             })
         }
+        
+        //Between an enemy and a platform. Let's test if it was hit from the left or right
+        // and then call the enemy's hit wall method
+        if (contactA.categoryBitMask == 256 && contactB.categoryBitMask == 4) ||
+            (contactA.categoryBitMask == 4 && contactB.categoryBitMask == 256) {
+            let enemy = (contactA.categoryBitMask == 256 ? nodeA : nodeB) as! Enemy
+            let enemyPosition = enemy.position
+            let contactPosition = contact.contactPoint
+            if contactPosition.x < enemyPosition.x - 6 { //The 6's act as buffer space.
+                enemy.hitWall(.Left)
+            } else if contactPosition.x > enemyPosition.x + 6 {
+                enemy.hitWall(.Right)
+            } else {
+                //The enemy probably is touching the ground
+                return
+            }
+        }
     }
     
     func didEndContact(contact: SKPhysicsContact) {
@@ -235,7 +259,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func addTentacleMember() {
         //Initialize the tentacle
-        let tentacle = TentacleMember(color: UIColor.blackColor(), size: CGSize(width: tentacleMemberWidth, height: tentacleMemberHeight))
+//        let tentacle = TentacleMember(color: UIColor.blackColor(), size: CGSize(width: tentacleMemberWidth, height: tentacleMemberHeight))
+        
+        let tentacle = TentacleMember(texture: SKTexture(imageNamed: "imgres-1"), size: CGSize(width: tentacleMemberWidth, height: tentacleMemberHeight))
+        
         tentacle.zPosition = 0
         tentacle.name = "tentacle"
         tentacle.anchorPoint = CGPoint(x: 0, y: 0.5)
@@ -268,6 +295,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // TODO Change the spring joint for the tentacle dragger to be connected to the new, most recent tentacle
         tentacleDragger.position = convertPoint(CGPoint(x: tentacle.size.width, y: 0), fromNode: lastTentacleMember!)
+        tentacleDragger.childNodeWithName("colorPartOfTentacleDragger")?.position = tentacleDragger.convertPoint(CGPoint(x: tentacle.size.width, y: 0), fromNode: lastTentacleMember!)
         if let tentacleDragJoint = tentacleDragJoint {
             physicsWorld.removeJoint(tentacleDragJoint)
         }
