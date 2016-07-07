@@ -17,6 +17,7 @@ enum Direction {
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
     let fixedDelta: CFTimeInterval = 1/60 //60 FPS
+    var cameraTarget: CGPoint!
     let maxPlayerSpeed: CGFloat = 200
     var player: SKSpriteNode!
     var canJump = false
@@ -171,11 +172,19 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
    
     override func update(currentTime: CFTimeInterval) {
+        
         if let _ = tentacleMovingTouch {
-            camera!.position.x = lastTentacleMember!.position.x
+            cameraTarget = CGPoint(x: lastTentacleMember!.position.x, y: lastTentacleMember!.position.y + 40)
         } else {
-            camera!.position.x = player.position.x
+            cameraTarget = player.position
         }
+        
+        //update the camera's position so that it get's closer to its target
+        let xDif = cameraTarget.x - camera!.position.x
+        camera!.position.x += xDif/10
+        let yDif = cameraTarget.y - camera!.position.y
+        camera!.position.y += yDif/10
+        
         for ref in enemyLayer.children {
             let enemy = ref.childNodeWithName("//avatar") as! Enemy
             enemy.update(currentTime)
