@@ -28,36 +28,41 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var tentacleMovingTouch: UITouch?
     var tentacleDragger: SKNode!
     var tentacleDragJoint: SKPhysicsJointSpring?
-    var tentacleCount = 0
+    var tentacleCount = 0 {
+        didSet {
+            //We only want the tentacle dragger to be visible as a draggy thing at the
+            // end of the tentacle structure. Otherwise it would just be floating around and looking weird.
+            if tentacleCount == 0 {
+                tentacleDragger.hidden = true
+            } else {
+                tentacleDragger.hidden = false
+            }
+
+        }
+    }
 
     override func didMoveToView(view: SKView) {
         physicsWorld.contactDelegate = self
         //physicsBody = SKPhysicsBody(edgeLoopFromRect: frame)
         player = childNodeWithName("player") as! SKSpriteNode
-        //playerFoot = childNodeWithName("foot") as! SKSpriteNode
-        //pin the foot on the player
-        //let footJoint = SKPhysicsJointPin.jointWithBodyA(player.physicsBody!, bodyB: playerFoot.physicsBody!, anchor: playerFoot.position)
-        //physicsWorld.addJoint(footJoint)
         tentacleDragger = childNodeWithName("tentacleDragger")
-        
-        
+        tentacleCount = 0
     }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
         for touch in touches {
             let location = touch.locationInNode(self)
             
-            //Check for touching end tentacle
-            if tentacleMovingTouch == nil && nodeAtPoint(location).name == "tentacle" &&
-                (nodeAtPoint(location) as! TentacleMember).isControllableTentacle {
-                let tentacle = nodeAtPoint(location) as! TentacleMember
+            //Check for touching end tentacle. check just for clicking on the tentacleDragger itself
+            if tentacleMovingTouch == nil && nodeAtPoint(location).name == "tentacleDragger" {
+                //let tentacle = nodeAtPoint(location) as! TentacleMember
                 tentacleMovingTouch = touch
                 // move the tentacleDraggerNode to the touch location
                 // then create a joint
                 tentacleDragger.position = location
-                let tentacleJointBindPoint = convertPoint(CGPoint(x: tentacle.size.width, y: tentacle.size.height/2), fromNode: tentacle)
-                tentacleDragJoint = SKPhysicsJointSpring.jointWithBodyA(tentacleDragger.physicsBody!, bodyB: tentacle.physicsBody!, anchorA: tentacleDragger.position, anchorB: tentacleJointBindPoint)
-                physicsWorld.addJoint(tentacleDragJoint!)
+//                let tentacleJointBindPoint = convertPoint(CGPoint(x: tentacle.size.width, y: tentacle.size.height/2), fromNode: tentacle)
+//                tentacleDragJoint = SKPhysicsJointSpring.jointWithBodyA(tentacleDragger.physicsBody!, bodyB: tentacle.physicsBody!, anchorA: tentacleDragger.position, anchorB: tentacleJointBindPoint)
+//                physicsWorld.addJoint(tentacleDragJoint!)
                 //player.physicsBody!.pinned = true
                 
             //Check for touch anywhere else (player movement)
@@ -76,8 +81,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 player.physicsBody?.velocity.dx = 0
             } else if touch === tentacleMovingTouch {
                 tentacleMovingTouch = nil
-                physicsWorld.removeJoint(tentacleDragJoint!)
-                tentacleDragJoint = nil
+                //physicsWorld.removeJoint(tentacleDragJoint!)
+                //tentacleDragJoint = nil
                 //player.physicsBody!.pinned = false
             }
         }
@@ -103,7 +108,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             } else if touch === tentacleMovingTouch {
                 // move the tentacleDragger
                 
-                //TODO cap the distance the player can drag
+                //caps the distance the player can drag
                 if player.position.distanceTo(touch.locationInNode(self)) > tentacleMemberWidth * CGFloat(tentacleCount) {
                     print("too far for tentacle!")
                     //Here I need to move the tentacle dragger to be in the same direction
@@ -234,7 +239,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         tentacle.zPosition = 0
         tentacle.name = "tentacle"
         tentacle.anchorPoint = CGPoint(x: 0, y: 0.5)
-        tentacle.physicsBody = SKPhysicsBody(rectangleOfSize: tentacle.size, center: CGPoint(x: tentacle.size.width/2, y: tentacle.size.height/2))
+        tentacle.physicsBody = SKPhysicsBody(rectangleOfSize: tentacle.size, center: CGPoint(x: tentacle.size.width/2, y: 0))
         tentacle.physicsBody?.dynamic = true
         tentacle.physicsBody?.allowsRotation = true
         tentacle.physicsBody?.affectedByGravity = false
@@ -250,16 +255,27 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             attatchPosition = player.position
         }
         tentacle.position = attatchPosition
-        lastTentacleMember?.isControllableTentacle = false
-        tentacle.isControllableTentacle = true
+        //lastTentacleMember?.isControllableTentacle = false
+        //tentacle.isControllableTentacle = true
         //tentacle.userInteractionEnabled = true
         addChild(tentacle)
         
-        //Add a joint
+        //Add a joint to connect the new tentacle member to the evergrowing main tentacle structure
         let tentacleJoint = SKPhysicsJointPin.jointWithBodyA(lastTentacleMember?.physicsBody ?? player.physicsBody!, bodyB: tentacle.physicsBody!, anchor: attatchPosition)
         physicsWorld.addJoint(tentacleJoint)
         
         lastTentacleMember = tentacle
+        
+        // TODO Change the spring joint for the tentacle dragger to be connected to the new, most recent tentacle
+        tentacleDragger.position = convertPoint(CGPoint(x: tentacle.size.width, y: 0), fromNode: lastTentacleMember!)
+        if let tentacleDragJoint = tentacleDragJoint {
+            physicsWorld.removeJoint(tentacleDragJoint)
+        }
+        let tentacleDragJointBindPoint = convertPoint(CGPoint(x: tentacle.size.width, y: 0), fromNode: lastTentacleMember!)
+        tentacleDragJoint = SKPhysicsJointSpring.jointWithBodyA(tentacleDragger.physicsBody!, bodyB: tentacle.physicsBody!, anchorA: tentacleDragger.position, anchorB: tentacleDragJointBindPoint)
+        physicsWorld.addJoint(tentacleDragJoint!)
+
+        
         tentacleCount += 1
     }
 }
