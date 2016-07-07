@@ -15,7 +15,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let fixedDelta: CFTimeInterval = 1/60 //60 FPS
     let maxPlayerSpeed: CGFloat = 200
     var player: SKSpriteNode!
-    var playerFoot: SKSpriteNode!
+    //var playerFoot: SKSpriteNode!
     var canJump = false
     var canJumpCounter: CFTimeInterval = 0
     //var camera: SKCameraNode!
@@ -34,10 +34,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         physicsWorld.contactDelegate = self
         //physicsBody = SKPhysicsBody(edgeLoopFromRect: frame)
         player = childNodeWithName("player") as! SKSpriteNode
-        playerFoot = childNodeWithName("foot") as! SKSpriteNode
+        //playerFoot = childNodeWithName("foot") as! SKSpriteNode
         //pin the foot on the player
-        let footJoint = SKPhysicsJointPin.jointWithBodyA(player.physicsBody!, bodyB: playerFoot.physicsBody!, anchor: playerFoot.position)
-        physicsWorld.addJoint(footJoint)
+        //let footJoint = SKPhysicsJointPin.jointWithBodyA(player.physicsBody!, bodyB: playerFoot.physicsBody!, anchor: playerFoot.position)
+        //physicsWorld.addJoint(footJoint)
         tentacleDragger = childNodeWithName("tentacleDragger")
         
         
@@ -132,10 +132,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 //Test for jumping. Notice how it is outside of the playerMovingTouchTest, so that any touch
                 // can make the player jump
                 let yMove = location.y - touch.previousLocationInNode(camera!).y
-                if yMove > 13 && canJump { //*** the canJump boolean is set in didBeginContact and didEndContact
+                if yMove > 14 && canJump { //*** the canJump boolean is set in didBeginContact and didEndContact
                     //Jump
-                    player.physicsBody?.applyImpulse(CGVector(dx: 0, dy: 50))
+                    player.physicsBody?.applyImpulse(CGVector(dx: 0, dy: 1000))
+                    //player.physicsBody?.velocity.dy = 50
                     playerMovingTouchOriginalPosition!.y = location.y
+                    canJump = false
                 }
             }
 
@@ -172,10 +174,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let nodeA = contactA.node as! SKSpriteNode
         let nodeB = contactB.node as! SKSpriteNode
         
-        //Did the contact happen between the player's foot and a platform?
-        if (contactA.categoryBitMask == 2 && contactB.categoryBitMask == 4) ||
-            (contactA.categoryBitMask == 4 && contactB.categoryBitMask == 2) {
-            canJump = true
+//        //Did the contact happen between the player's foot and a platform?
+//        if (contactA.categoryBitMask == 2 && contactB.categoryBitMask == 4) ||
+//            (contactA.categoryBitMask == 4 && contactB.categoryBitMask == 2) {
+//            canJump = true
+//        }
+        
+        //Player landed on ground
+        if (contactA.categoryBitMask == 1 && contactB.categoryBitMask == 4) || (contactA.categoryBitMask == 4 && contactB.categoryBitMask == 1) {
+            let playerPoint = player.position
+            let difference = playerPoint.y - player.size.height/2 - contact.contactPoint.y
+            if(difference < 6 && difference > -6) {
+                canJump = true
+            } else {
+                canJump = false
+            }
         }
         
         //Did the contact happen between the player and a tentacleGrowOrb?
@@ -194,12 +207,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let contactB = contact.bodyB
         let nodeA = contactA.node as! SKSpriteNode
         let nodeB = contactB.node as! SKSpriteNode
+//
+//        //Did the contact end between the player's foot and a platform?
+//        if (contactA.categoryBitMask == 2 && contactB.categoryBitMask == 4) ||
+//            (contactA.categoryBitMask == 4 && contactB.categoryBitMask == 2) {
+//            canJump = false
+//        }
         
-        //Did the contact end between the player's foot and a platform?
-        if (contactA.categoryBitMask == 2 && contactB.categoryBitMask == 4) ||
-            (contactA.categoryBitMask == 4 && contactB.categoryBitMask == 2) {
-            canJump = false
+        //player jumped off
+        if (contactA.categoryBitMask == 1 && contactB.categoryBitMask == 4) || (contactA.categoryBitMask == 4 && contactB.categoryBitMask == 1) {
+            let playerPoint = player.position
+            let difference = playerPoint.y - player.size.height/2 - contact.contactPoint.y
+            if(difference >= 6) {
+                canJump = false
+            } else {
+                canJump = true
+            }
         }
+
 
     }
     
