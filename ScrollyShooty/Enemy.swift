@@ -53,4 +53,22 @@ class Enemy: SKSpriteNode {
         }
     }
     
+//    func die () {
+//        
+//        //load particle effect
+//        let particles = SKEmitterNode(fileNamed: "EnemyExplosion")!
+//        particles.position = position
+//        particles.numParticlesToEmit = 25
+//        parent!.addChild(particles)
+//        
+//        let removeAction = SKAction.runBlock({
+//            self.parent!.removeFromParent()
+//            self.removeFromParent()
+//        })
+//        
+//        self.runAction(removeAction)
+//        
+//    }
+//
+    
 }

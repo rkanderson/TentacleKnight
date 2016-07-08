@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		833632721D300DC500C8FA9E /* EnemyExplosion.sks in Resources */ = {isa = PBXBuildFile; fileRef = 833632711D300DC500C8FA9E /* EnemyExplosion.sks */; };
+		833632741D30107100C8FA9E /* spark.png in Resources */ = {isa = PBXBuildFile; fileRef = 833632731D30107100C8FA9E /* spark.png */; };
 		833B7E921D2D85710069C6C9 /* TentacleMember.swift in Sources */ = {isa = PBXBuildFile; fileRef = 833B7E911D2D85710069C6C9 /* TentacleMember.swift */; };
 		8346A4DF1D2ECD8200AE0A0F /* Enemy.sks in Resources */ = {isa = PBXBuildFile; fileRef = 8346A4DE1D2ECD8200AE0A0F /* Enemy.sks */; };
 		8346A4E11D2ECEFF00AE0A0F /* Enemy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8346A4E01D2ECEFF00AE0A0F /* Enemy.swift */; };
@@ -34,6 +36,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		833632711D300DC500C8FA9E /* EnemyExplosion.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = EnemyExplosion.sks; sourceTree = "<group>"; };
+		833632731D30107100C8FA9E /* spark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = spark.png; sourceTree = "<group>"; };
 		833B7E911D2D85710069C6C9 /* TentacleMember.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TentacleMember.swift; sourceTree = "<group>"; };
 		8346A4DE1D2ECD8200AE0A0F /* Enemy.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Enemy.sks; sourceTree = "<group>"; };
 		8346A4E01D2ECEFF00AE0A0F /* Enemy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Enemy.swift; sourceTree = "<group>"; };
@@ -104,6 +108,8 @@
 				833B7E911D2D85710069C6C9 /* TentacleMember.swift */,
 				8346A4DE1D2ECD8200AE0A0F /* Enemy.sks */,
 				8346A4E01D2ECEFF00AE0A0F /* Enemy.swift */,
+				833632711D300DC500C8FA9E /* EnemyExplosion.sks */,
+				833632731D30107100C8FA9E /* spark.png */,
 			);
 			path = ScrollyShooty;
 			sourceTree = "<group>";
@@ -198,6 +204,8 @@
 			files = (
 				839686251D2C4AFD007CF4F6 /* GameScene.sks in Resources */,
 				839686311D2C4AFE007CF4F6 /* LaunchScreen.storyboard in Resources */,
+				833632721D300DC500C8FA9E /* EnemyExplosion.sks in Resources */,
+				833632741D30107100C8FA9E /* spark.png in Resources */,
 				8396862E1D2C4AFE007CF4F6 /* Assets.xcassets in Resources */,
 				8346A4DF1D2ECD8200AE0A0F /* Enemy.sks in Resources */,
 				8396862C1D2C4AFD007CF4F6 /* Main.storyboard in Resources */,
