@@ -10,6 +10,7 @@
 		833632721D300DC500C8FA9E /* EnemyExplosion.sks in Resources */ = {isa = PBXBuildFile; fileRef = 833632711D300DC500C8FA9E /* EnemyExplosion.sks */; };
 		833632741D30107100C8FA9E /* spark.png in Resources */ = {isa = PBXBuildFile; fileRef = 833632731D30107100C8FA9E /* spark.png */; };
 		833B7E921D2D85710069C6C9 /* TentacleMember.swift in Sources */ = {isa = PBXBuildFile; fileRef = 833B7E911D2D85710069C6C9 /* TentacleMember.swift */; };
+		8341A9FD1D3041810089DFFC /* MyActions.sks in Resources */ = {isa = PBXBuildFile; fileRef = 8341A9FC1D3041810089DFFC /* MyActions.sks */; };
 		8346A4DF1D2ECD8200AE0A0F /* Enemy.sks in Resources */ = {isa = PBXBuildFile; fileRef = 8346A4DE1D2ECD8200AE0A0F /* Enemy.sks */; };
 		8346A4E11D2ECEFF00AE0A0F /* Enemy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8346A4E01D2ECEFF00AE0A0F /* Enemy.swift */; };
 		839686231D2C4AFD007CF4F6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839686221D2C4AFD007CF4F6 /* AppDelegate.swift */; };
@@ -39,6 +40,7 @@
 		833632711D300DC500C8FA9E /* EnemyExplosion.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = EnemyExplosion.sks; sourceTree = "<group>"; };
 		833632731D30107100C8FA9E /* spark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = spark.png; sourceTree = "<group>"; };
 		833B7E911D2D85710069C6C9 /* TentacleMember.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TentacleMember.swift; sourceTree = "<group>"; };
+		8341A9FC1D3041810089DFFC /* MyActions.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = MyActions.sks; sourceTree = "<group>"; };
 		8346A4DE1D2ECD8200AE0A0F /* Enemy.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Enemy.sks; sourceTree = "<group>"; };
 		8346A4E01D2ECEFF00AE0A0F /* Enemy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Enemy.swift; sourceTree = "<group>"; };
 		8396861F1D2C4AFD007CF4F6 /* ScrollyShooty.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ScrollyShooty.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -50,7 +52,7 @@
 		8396862D1D2C4AFE007CF4F6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		839686301D2C4AFE007CF4F6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		839686321D2C4AFE007CF4F6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		839686391D2C7967007CF4F6 /* MSButtonNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSButtonNode.swift; sourceTree = "<group>"; };
+		839686391D2C7967007CF4F6 /* MSButtonNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = MSButtonNode.swift; path = Utils/MSButtonNode.swift; sourceTree = "<group>"; };
 		8396863A1D2C7967007CF4F6 /* MSReferenceNode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MSReferenceNode.swift; sourceTree = "<group>"; };
 		8396863C1D2C7967007CF4F6 /* CGFloat+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CGFloat+Extensions.swift"; sourceTree = "<group>"; };
 		8396863D1D2C7967007CF4F6 /* CGPoint+Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CGPoint+Extensions.swift"; sourceTree = "<group>"; };
@@ -96,6 +98,7 @@
 		839686211D2C4AFD007CF4F6 /* ScrollyShooty */ = {
 			isa = PBXGroup;
 			children = (
+				839686391D2C7967007CF4F6 /* MSButtonNode.swift */,
 				839686381D2C7967007CF4F6 /* Utils */,
 				839686221D2C4AFD007CF4F6 /* AppDelegate.swift */,
 				839686241D2C4AFD007CF4F6 /* GameScene.sks */,
@@ -110,6 +113,7 @@
 				8346A4E01D2ECEFF00AE0A0F /* Enemy.swift */,
 				833632711D300DC500C8FA9E /* EnemyExplosion.sks */,
 				833632731D30107100C8FA9E /* spark.png */,
+				8341A9FC1D3041810089DFFC /* MyActions.sks */,
 			);
 			path = ScrollyShooty;
 			sourceTree = "<group>";
@@ -117,7 +121,6 @@
 		839686381D2C7967007CF4F6 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				839686391D2C7967007CF4F6 /* MSButtonNode.swift */,
 				8396863A1D2C7967007CF4F6 /* MSReferenceNode.swift */,
 				8396863B1D2C7967007CF4F6 /* SKTUtils */,
 			);
@@ -205,6 +208,7 @@
 				839686251D2C4AFD007CF4F6 /* GameScene.sks in Resources */,
 				839686311D2C4AFE007CF4F6 /* LaunchScreen.storyboard in Resources */,
 				833632721D300DC500C8FA9E /* EnemyExplosion.sks in Resources */,
+				8341A9FD1D3041810089DFFC /* MyActions.sks in Resources */,
 				833632741D30107100C8FA9E /* spark.png in Resources */,
 				8396862E1D2C4AFE007CF4F6 /* Assets.xcassets in Resources */,
 				8346A4DF1D2ECD8200AE0A0F /* Enemy.sks in Resources */,

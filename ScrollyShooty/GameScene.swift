@@ -10,6 +10,19 @@ import Foundation
 import CoreMotion
 import SpriteKit
 
+enum CBit: UInt32 { //Category bitmask
+    case Player = 1
+    case PlayerFoot = 2 //Deprecated
+    case Platform = 4
+    case TentacleMember = 8
+    case TentacleGrowOrb = 16
+    case SolidMoveableObject = 32
+    case Ladder = 64
+    case BS = 128 //You can't have a collision mask of zero :(. so we need this
+    case Enemy = 256
+    case PlayerHand = 512
+}
+
 enum Direction {
     case Left, Right
 }
@@ -48,10 +61,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     var enemyLayer: SKNode!
     var grabJoint: SKPhysicsJointPin?
+    var tentacleLimitJoint: SKPhysicsJointLimit?
+    
+    var joyStickBox: SKNode!
+    var controlStick: SKNode! //child of joyStickBox
 
     override func didMoveToView(view: SKView) {
         physicsWorld.contactDelegate = self
-        //physicsBody = SKPhysicsBody(edgeLoopFromRect: frame)
         player = childNodeWithName("player") as! SKSpriteNode
         tentacleDragger = childNodeWithName("tentacleDragger")
         colorPartOfTentacleDragger = childNodeWithName("colorPartOfTentacleDragger")
@@ -65,10 +81,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             enemy.setUp()
         }
         
-        //spawn some tentacles outright
-        for _ in 1...6 {
-            addTentacleMember()
-        }
+//        //spawn some tentacles outright
+//        for _ in 1...6 {
+//            addTentacleMember()
+//        }
+        
+        let restartButton = childNodeWithName("//restartButtonz") as! MSButtonNode
+        restartButton.selectedHandler = restart
+        
+        joyStickBox = childNodeWithName("//joyStickBox")
+        controlStick = childNodeWithName("//controlStick")
+        joyStickBox.hidden = true
     }
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
@@ -84,6 +107,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             } else if playerMovingTouch === nil {
                 playerMovingTouch = touch
                 playerMovingTouchOriginalPosition = touch.locationInNode(camera!)
+                
+                //make the joystick appear
+                joyStickBox.position = touch.locationInNode(camera!)
+                joyStickBox.hidden = false
             }
         }
     }
@@ -94,12 +121,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 playerMovingTouch = nil
                 playerMovingTouchOriginalPosition = nil
                 player.physicsBody?.velocity.dx = 0
+                joyStickBox.hidden = true //reset controlStick
+                controlStick.position.x = 0
             } else if touch === tentacleMovingTouch {
                 tentacleMovingTouch = nil
                 if let _ = grabJoint {
                     runAction(SKAction.runBlock{
                         self.physicsWorld.removeJoint(self.grabJoint!)
+                        if self.grabJoint!.bodyA.categoryBitMask == CBit.Enemy.rawValue {
+                            (self.grabJoint!.bodyA.node as! Enemy).isBeingHeld = false
+                        } else if self.grabJoint!.bodyA.categoryBitMask == CBit.Enemy.rawValue {
+                            (self.grabJoint!.bodyA.node as! Enemy).isBeingHeld = false
+                        }
                         self.grabJoint = nil
+                        
                     })
                 }
             }
@@ -115,6 +150,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 let deltaX = location.x - playerMovingTouchOriginalPosition!.x
                 player.physicsBody!.velocity.dx = deltaX*4
                 player.physicsBody!.velocity.dx.clamp(-maxPlayerSpeed, maxPlayerSpeed)
+                controlStick.position.x = deltaX
+                controlStick.position.x.clamp(-30, 30)
                 
                 if player.physicsBody!.velocity.dx > 0 {
                     player.xScale = abs(player.xScale)
@@ -173,9 +210,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func update(currentTime: CFTimeInterval) {
         
         if let _ = tentacleMovingTouch {
-            cameraTarget = CGPoint(x: lastTentacleMember!.position.x, y: lastTentacleMember!.position.y + 40)
+            cameraTarget = CGPoint(x: lastTentacleMember!.position.x, y: lastTentacleMember!.position.y)
         } else {
-            cameraTarget = player.position
+            cameraTarget = CGPoint(x: player.position.x, y: player.position.y + 50)
         }
         
         //update the camera's position so that it get's closer to its target
@@ -222,7 +259,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             (contactA.categoryBitMask == 32 && contactB.categoryBitMask == 1) {
             let playerPoint = player.position
             let difference = playerPoint.y - player.size.height/2 - contact.contactPoint.y
-            if(difference < 6 && difference > -6) {
+            if difference < 6 && difference > -6 && !(contact.contactPoint.x < player.position.x - 6 || contact.contactPoint.x > player.position.x + 6 ) {
                 canJump = true
             } else {
                 canJump = false
@@ -239,11 +276,14 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             })
         }
         
-        //Between an enemy and a platform. Let's test if it was hit from the left or right
-        // and then call the enemy's hit wall method
-        if (contactA.categoryBitMask == 256 && contactB.categoryBitMask == 4) ||
-            (contactA.categoryBitMask == 4 && contactB.categoryBitMask == 256) {
-            let enemy = (contactA.categoryBitMask == 256 ? nodeA : nodeB) as! Enemy
+        // Helper method to check if an enemy needs to turn around
+        func handleEnemyTurnaround(node: Enemy? = nil) {
+            let enemy: Enemy
+            if let node = node {
+                enemy = node
+            } else {
+                enemy = (contactA.categoryBitMask == 256 ? nodeA : nodeB) as! Enemy
+            }
             let enemyPosition = convertPoint(enemy.position, fromNode: enemy.parent!)
             let contactPosition = contact.contactPoint
             if contactPosition.x < enemyPosition.x - 6 { //The 6's act as buffer space.
@@ -254,6 +294,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 //The enemy probably is touching the ground
                 return
             }
+        }
+        
+        //Between an enemy and a platform Let's test if it was hit from the left or right
+        // and then call the enemy's hit wall method
+        if (contactA.categoryBitMask == 256 && contactB.categoryBitMask == 4) ||
+            (contactA.categoryBitMask == 4 && contactB.categoryBitMask == 256) {
+                handleEnemyTurnaround()
         }
     
         //Between player hand and (a solid object or enemy)
@@ -271,6 +318,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 // Ok so there isn't a joint and the player's hand touched some solid object. Time to make a joint between the two. They better have physics bodies.......
                 grabJoint = SKPhysicsJointPin.jointWithBodyA(hand.physicsBody!, bodyB: solidObject.physicsBody!, anchor: hand.position)
                 physicsWorld.addJoint(grabJoint!)
+                if solidObject.isKindOfClass(Enemy) {
+                    (solidObject as! Enemy).isBeingHeld = true
+                }
             }
         }
         
@@ -281,14 +331,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 let enemy = (contactA.categoryBitMask == 256 ? nodeA : nodeB) as! Enemy
                 dieEnemy(enemy)
                 print("enemy wasted")
+            } else {
+                handleEnemyTurnaround() //Hey, the enemy could just bump into this and turn around
             }
         }
         
         //Between enemy and enemy
-        if contactA.categoryBitMask == 256 && contactB.categoryBitMask == 256 &&
-            contact.collisionImpulse > 40.0 {
-            dieEnemy(nodeA)
-            dieEnemy(nodeB)
+        if contactA.categoryBitMask == 256 && contactB.categoryBitMask == 256 {
+            if contact.collisionImpulse > 40.0  {
+                dieEnemy(nodeA)
+                dieEnemy(nodeB)
+            } else {
+                handleEnemyTurnaround(nodeA as! Enemy)
+                handleEnemyTurnaround(nodeB as! Enemy)
+            }
         }
         
 //        if contactA.categoryBitMask == 256 || contactB.categoryBitMask == 256 {
@@ -324,7 +380,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     func dieEnemy(node: SKNode) {
         
         let particles = SKEmitterNode(fileNamed: "EnemyExplosion")!
-        particles.position = self.convertPoint(node.position, fromNode: node)
+        particles.position = node.position
+        particles.zPosition = 10
         particles.numParticlesToEmit = 25
         addChild(particles)
         
@@ -332,7 +389,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             node.removeFromParent()
         })
         
-        self.runAction(removeAction)
+        let cameraShakeAction = SKAction.init(named: "cameraShakeLight")!
+        let sequence = SKAction.sequence([removeAction, cameraShakeAction])
+        self.runAction(sequence)
         
     }
 
@@ -353,7 +412,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         tentacle.physicsBody?.pinned = false
         tentacle.physicsBody?.restitution = 0.2
         tentacle.physicsBody?.categoryBitMask = 8
-        tentacle.physicsBody?.collisionBitMask = 4
+        tentacle.physicsBody?.collisionBitMask =
+            CBit.Platform.rawValue | CBit.SolidMoveableObject.rawValue | CBit.Enemy.rawValue
         tentacle.physicsBody?.mass = 0.01
         let attatchPosition: CGPoint
         if let lastTentacleMember = lastTentacleMember {
@@ -381,9 +441,30 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let tentacleDragJointBindPoint = convertPoint(CGPoint(x: tentacle.size.width, y: 0), fromNode: lastTentacleMember!)
         tentacleDragJoint = SKPhysicsJointSpring.jointWithBodyA(tentacleDragger.physicsBody!, bodyB: tentacle.physicsBody!, anchorA: tentacleDragger.position, anchorB: tentacleDragJointBindPoint)
         physicsWorld.addJoint(tentacleDragJoint!)
-
+        
         
         tentacleCount += 1
+        
+        
+        //tentacle limit joint to cap how far you can pull the tentacle
+        if let tentacleLimitJoint = tentacleLimitJoint {
+            physicsWorld.removeJoint(tentacleLimitJoint)
+        }
+        tentacleLimitJoint = SKPhysicsJointLimit.jointWithBodyA(player.physicsBody!, bodyB: tentacleDragger.physicsBody!, anchorA: player.position, anchorB: tentacleDragger.position)
+        tentacleLimitJoint!.maxLength = CGFloat(tentacleCount) * tentacleMemberWidth
+        physicsWorld.addJoint(tentacleLimitJoint!)
+
+    }
+    
+    
+    func restart() {
+        let skView = self.view as SKView!
+        let scene = GameScene(fileNamed:"GameScene") as GameScene!
+        scene.scaleMode = .AspectFill
+        //skView.showsPhysics = true
+        skView.showsDrawCount = true
+        skView.showsFPS = true
+        skView.presentScene(scene)
     }
 
 }

@@ -13,6 +13,15 @@ class Enemy: SKSpriteNode {
     
     let standardEnemySpeed: CGFloat = 100
     var direction: Direction = .Right
+    var isBeingHeld = false { //set to true when it is held by the player.
+        didSet {
+            physicsBody!.allowsRotation = isBeingHeld
+            if !isBeingHeld {
+                let rotateAction = SKAction.rotateToAngle(0, duration: 0.2)
+                runAction(rotateAction)
+            }
+        }
+    }
     
     func setUp() {
         physicsBody?.velocity.dx = standardEnemySpeed
